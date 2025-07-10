@@ -1,0 +1,12 @@
+# Streamlit
+streamlit>=1.28.0
+
+# AWS Bedrock
+langchain-aws>=0.1.0
+boto3>=1.34.0
+
+# Couchbase
+couchbase>=4.2.0
+
+# Utilities
+python-dotenv>=1.0.0
