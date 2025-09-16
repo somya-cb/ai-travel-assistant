@@ -1,0 +1,115 @@
+{
+  "type": "fulltext-index",
+  "name": "travel_assistant.travel_data.vector-index",
+  "uuid": "79228f503075856f",
+  "sourceType": "gocbcore",
+  "sourceName": "travel_assistant",
+  "sourceUUID": "1859ea631ffd546fa0574304cc6c910a",
+  "planParams": {
+    "maxPartitionsPerPIndex": 1024,
+    "indexPartitions": 1,
+    "numReplicas": 1
+  },
+  "params": {
+    "doc_config": {
+      "docid_prefix_delim": "",
+      "docid_regexp": "",
+      "mode": "scope.collection.type_field",
+      "type_field": "type"
+    },
+    "mapping": {
+      "analysis": {},
+      "default_analyzer": "standard",
+      "default_datetime_parser": "dateTimeOptional",
+      "default_field": "_all",
+      "default_mapping": {
+        "dynamic": false,
+        "enabled": false
+      },
+      "default_type": "_default",
+      "docvalues_dynamic": false,
+      "index_dynamic": true,
+      "store_dynamic": true,
+      "type_field": "_type",
+      "types": {
+        "travel_data.destinations": {
+          "dynamic": true,
+          "enabled": true,
+          "properties": {
+            "budget_level": {
+              "dynamic": false,
+              "enabled": true,
+              "fields": [
+                {
+                  "analyzer": "simple",
+                  "index": true,
+                  "name": "budget_level",
+                  "store": true,
+                  "type": "text"
+                }
+              ]
+            },
+            "city": {
+              "dynamic": false,
+              "enabled": true,
+              "fields": [
+                {
+                  "analyzer": "simple",
+                  "index": true,
+                  "name": "city",
+                  "store": true,
+                  "type": "text"
+                }
+              ]
+            },
+            "country": {
+              "dynamic": false,
+              "enabled": true,
+              "fields": [
+                {
+                  "analyzer": "simple",
+                  "index": true,
+                  "name": "country",
+                  "store": true,
+                  "type": "text"
+                }
+              ]
+            },
+            "description_embedding": {
+              "dynamic": false,
+              "enabled": true,
+              "fields": [
+                {
+                  "dims": 384,
+                  "index": true,
+                  "name": "description_embedding",
+                  "similarity": "cosine",
+                  "type": "vector",
+                  "vector_index_optimized_for": "recall"
+                }
+              ]
+            },
+            "region": {
+              "dynamic": false,
+              "enabled": true,
+              "fields": [
+                {
+                  "analyzer": "simple",
+                  "index": true,
+                  "name": "region",
+                  "store": true,
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "store": {
+      "indexType": "scorch",
+      "segmentVersion": 16
+    }
+  },
+  "sourceParams": {}
+}

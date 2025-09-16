@@ -1,0 +1,75 @@
+{
+  "type": "fulltext-index",
+  "name": "travel_assistant.travel_data.hotels_fts",
+  "uuid": "1f4be2d69c9ec7c3",
+  "sourceType": "gocbcore",
+  "sourceName": "travel_assistant",
+  "sourceUUID": "144ab03f89aea02a14d20dc88b2f65f0",
+  "planParams": {
+    "maxPartitionsPerPIndex": 1024,
+    "indexPartitions": 1,
+    "numReplicas": 1
+  },
+  "params": {
+    "doc_config": {
+      "docid_prefix_delim": "",
+      "docid_regexp": "",
+      "mode": "scope.collection.type_field",
+      "type_field": "type"
+    },
+    "mapping": {
+      "analysis": {},
+      "default_analyzer": "standard",
+      "default_datetime_parser": "dateTimeOptional",
+      "default_field": "_all",
+      "default_mapping": {
+        "dynamic": false,
+        "enabled": false
+      },
+      "default_type": "_default",
+      "docvalues_dynamic": false,
+      "index_dynamic": true,
+      "store_dynamic": true,
+      "type_field": "_type",
+      "types": {
+        "travel_data.hotels": {
+          "dynamic": false,
+          "enabled": true,
+          "properties": {
+            " cityName": {
+              "dynamic": false,
+              "enabled": true,
+              "fields": [
+                {
+                  "analyzer": "en",
+                  "index": true,
+                  "name": " cityName",
+                  "store": true,
+                  "type": "text"
+                }
+              ]
+            },
+            " countyName": {
+              "dynamic": false,
+              "enabled": true,
+              "fields": [
+                {
+                  "analyzer": "en",
+                  "index": true,
+                  "name": " countyName",
+                  "store": true,
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "store": {
+      "indexType": "scorch",
+      "segmentVersion": 15
+    }
+  },
+  "sourceParams": {}
+}
