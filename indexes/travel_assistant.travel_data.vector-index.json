@@ -1,10 +1,10 @@
 {
   "type": "fulltext-index",
   "name": "travel_assistant.travel_data.vector-index",
-  "uuid": "79228f503075856f",
+  "uuid": "120fb3453f82d9f6",
   "sourceType": "gocbcore",
   "sourceName": "travel_assistant",
-  "sourceUUID": "1859ea631ffd546fa0574304cc6c910a",
+  "sourceUUID": "1d8020d1d85dc850d0bf6c617b9d2c2c",
   "planParams": {
     "maxPartitionsPerPIndex": 1024,
     "indexPartitions": 1,
@@ -75,14 +75,14 @@
                 }
               ]
             },
-            "description_embedding": {
+            "embedding": {
               "dynamic": false,
               "enabled": true,
               "fields": [
                 {
                   "dims": 384,
                   "index": true,
-                  "name": "description_embedding",
+                  "name": "embedding",
                   "similarity": "cosine",
                   "type": "vector",
                   "vector_index_optimized_for": "recall"

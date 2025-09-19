@@ -1,10 +1,10 @@
 {
   "type": "fulltext-index",
   "name": "travel_assistant.travel_data.hotels_fts",
-  "uuid": "1f4be2d69c9ec7c3",
+  "uuid": "5704163266644c61",
   "sourceType": "gocbcore",
   "sourceName": "travel_assistant",
-  "sourceUUID": "144ab03f89aea02a14d20dc88b2f65f0",
+  "sourceUUID": "1d8020d1d85dc850d0bf6c617b9d2c2c",
   "planParams": {
     "maxPartitionsPerPIndex": 1024,
     "indexPartitions": 1,
@@ -36,27 +36,29 @@
           "dynamic": false,
           "enabled": true,
           "properties": {
-            " cityName": {
+            "cityName": {
               "dynamic": false,
               "enabled": true,
               "fields": [
                 {
-                  "analyzer": "en",
+                  "analyzer": "keyword",
+                  "include_term_vectors": true,
                   "index": true,
-                  "name": " cityName",
+                  "name": "cityName",
                   "store": true,
                   "type": "text"
                 }
               ]
             },
-            " countyName": {
+            "countyName": {
               "dynamic": false,
               "enabled": true,
               "fields": [
                 {
-                  "analyzer": "en",
+                  "analyzer": "keyword",
+                  "include_term_vectors": true,
                   "index": true,
-                  "name": " countyName",
+                  "name": "countyName",
                   "store": true,
                   "type": "text"
                 }
