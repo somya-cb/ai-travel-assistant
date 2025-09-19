@@ -1,0 +1,23 @@
+{
+    "couchbase_connection_string": "couchbases://YOUR_CLUSTER_ID.cloud.couchbase.com",
+    "couchbase_username": "YOUR_COUCHBASE_USERNAME",
+    "couchbase_password": "YOUR_COUCHBASE_PASSWORD",
+    "couchbase_bucket": "travel_assistant",
+    "couchbase_scope": "travel_data",
+    "user_profiles_collection": "user_profiles",
+    "destinations_collection": "destinations",
+    "hotels_collection": "hotels",
+    "itineraries_collection": "itineraries",
+    "vector_index_name": "vector-index",
+    "vector_field": "embedding",
+    "fts_index_name": "travel_assistant.travel_data.hotels_fts",
+    "aws_access_key_id": "YOUR_AWS_ACCESS_KEY_ID",
+    "aws_secret_access_key": "YOUR_AWS_SECRET_ACCESS_KEY",
+    "aws_region": "us-east-2",
+    "bedrock_model_id": "us.meta.llama4-maverick-17b-instruct-v1:0",
+    "llm_defaults": {
+      "temperature": 0.7,
+      "max_tokens": 1500,
+      "top_p": 0.9
+    }
+  }
