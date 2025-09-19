@@ -1,13 +1,15 @@
 # couchbase_service.py
 from couchbase.exceptions import DocumentNotFoundException
 import couchbase.subdocument as SD
-from couchbase_connection import (
+from services.couchbase_connection import (
     get_cluster, 
     get_destinations_collection, 
     get_user_profiles_collection,
     config
 )
 import streamlit as st
+from datetime import datetime
+
 
 # Get shared connections
 cluster = get_cluster()
@@ -148,3 +150,42 @@ def get_cities_by_country(country: str) -> list:
         return [row['city'] for row in result if row['city']]
     except Exception as e:
         return []
+    
+# ── Itinerary functions ─────────────────────────────────────────
+def get_itineraries_collection():
+    """Get Couchbase collection for itineraries in travel_data scope"""
+    bucket = cluster.bucket(config['couchbase_bucket'])
+    scope = bucket.scope("travel_data")
+    collection = scope.collection(config['itineraries_collection'])
+    return collection
+
+def save_itinerary(user_id: str, itinerary_text: str, metadata: dict = None) -> str:
+    """
+    Save an itinerary for a given user_id in travel_data.itineraries.
+    Returns the document key.
+    """
+    collection = get_itineraries_collection()
+    doc_key = f"itinerary::{user_id}::{int(datetime.utcnow().timestamp())}"
+    
+    doc = {
+        "user_id": user_id,
+        "itinerary_text": itinerary_text,
+        "destination": metadata.get("destination") if metadata else {},
+        "dates": metadata.get("dates") if metadata else {},
+        "hotel": metadata.get("hotel") if metadata else {},
+        "created_at": datetime.utcnow().isoformat()
+    }
+    
+    collection.upsert(doc_key, doc)
+    return doc_key
+
+def get_user_itineraries(user_id: str) -> list[dict]:
+    """Fetch all itineraries for a specific user"""
+    collection_name = config['itineraries_collection']
+    query = f"""
+    SELECT * FROM `{config['couchbase_bucket']}`.`travel_data`.`{collection_name}`
+    WHERE user_id = $1
+    ORDER BY created_at DESC
+    """
+    result = cluster.query(query, user_id)
+    return [row[collection_name] if collection_name in row else row for row in result]

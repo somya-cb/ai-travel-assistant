@@ -8,7 +8,7 @@ from couchbase.search import ConjunctionQuery, MatchQuery
 from couchbase.vector_search import VectorQuery, VectorSearch
 from couchbase.search import SearchRequest
 from couchbase.options import SearchOptions
-from src.services.couchbase_connection import (
+from services.couchbase_connection import (
     get_cluster, 
     get_destinations_collection, 
     get_scope,
@@ -24,7 +24,7 @@ cluster = get_cluster()
 scope = get_scope()
 collection = get_destinations_collection()
 
-# Load embedding model (cache this to avoid reloading)
+# Load embedding model 
 @st.cache_resource
 def load_sentence_transformer():
     return SentenceTransformer("all-MiniLM-L6-v2")
@@ -89,53 +89,72 @@ def generate_query_from_persona(persona: Dict) -> str:
     query = " ".join(str(part) for part in query_parts if part)
     return query or "travel destinations"
 
-def run_vector_search(query_str: str, filters: Optional[Dict] = None, k: int = 10, debug: bool = False):
-    """Execute vector search with optional filters"""
+def run_vector_search(query_str: str, filters: Optional[Dict] = None, k: int = 10, debug: bool = False) -> List[Dict]:
+    """
+    Execute a vector search with optional FTS prefilters.
+    """
     try:
-        if debug:
-            logger.info(f"Vector search query: '{query_str}' with {k} results")
-            
+        logger.info(f"Running vector search for query: '{query_str}' with k={k}")
+
         # Generate embedding
         embedding = model.encode(query_str).tolist()
-        
-        # Build prefilter
+        if debug:
+            logger.info(f"Embedding generated (len={len(embedding)}): {embedding[:5]}...")
+
+        # Build FTS prefilter
         prefilter = build_fts_filters(filters, debug=debug)
-        
+        if debug:
+            logger.info(f"Prefilter used: {prefilter}")
+
+        # Validate vector config
+        vector_field = config.get("vector_field")
+        vector_index = config.get("vector_index_name")
+        if not vector_field or not vector_index:
+            logger.error("Vector field or index name not set in config")
+            return []
+
         # Create vector query
         vector_query = VectorQuery(
-            field_name=config["vector_field"],
+            field_name=vector_field,
             vector=embedding,
             prefilter=prefilter,
-            num_candidates=k * 2  
+            num_candidates=k * 2
         )
+        if debug:
+            logger.info(f"Vector query created for field '{vector_field}' with num_candidates={vector_query.num_candidates}")
 
-        # Execute search
+        # Execute vector search
         vs = VectorSearch.from_vector_query(vector_query)
         search_request = SearchRequest.create(vs)
-        
-        results = scope.search(
-            config["vector_index_name"], 
+        search_results = scope.search(
+            vector_index,
             search_request,
             SearchOptions(limit=k, fields=["*"])
         )
 
-        # Fetch documents
+        # Consume iterator and store in a list
+        rows_list = list(search_results.rows())
+
+        # Log search result IDs
+        result_ids = [row.id for row in rows_list]
+        logger.info(f"Vector search returned {len(result_ids)} rows: {result_ids}")
+
+        # Fetch documents from collection
         documents = []
-        for row in results.rows():
+        for row in rows_list:
             try:
                 doc = collection.get(row.id).content_as[dict]
-                doc["_id"] = row.id  # Add document ID
-                doc["_score"] = getattr(row, 'score', 0)  # Add relevance score
+                doc["_id"] = row.id
+                doc["_score"] = getattr(row, "score", 0)
                 documents.append(doc)
             except Exception as e:
                 logger.warning(f"Could not fetch document {row.id}: {e}")
-                continue
-        
+
         if debug:
-            logger.info(f"Successfully retrieved {len(documents)} documents")
-            
+            logger.info(f"Successfully fetched {len(documents)} documents from collection")
+
         return documents
-        
+
     except Exception as e:
         logger.error(f"Vector search failed: {e}")
         return []

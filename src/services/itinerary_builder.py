@@ -4,8 +4,8 @@ from datetime import datetime
 import logging
 import re
 
-from prompt_templates import build_itinerary_prompt
-from bedrock_service import call_llama4
+from services.prompt_templates import build_itinerary_prompt
+from services.bedrock_service import call_llama4
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -96,33 +96,35 @@ def get_temperature_info(destination: dict, start_date: str, end_date: str) -> s
 # Itinerary Generation
 # ────────────────────────────────────────────────
 def generate_itinerary(persona: dict, destination: dict, dates: dict, hotel: dict = None) -> str:
-    
-    # Basic validation
     if not destination.get("city") or not dates.get("start"):
         return "Error: Missing required information"
     
-    # Simple weather info 
-    weather_info = f"Weather info for {destination.get('city')}"  
+    # Weather info 
+    weather_info = get_temperature_info(destination, dates["start"], dates["end"])
     
-    # Build prompt
+    # Build LLM prompt
     prompt = build_itinerary_prompt(persona, destination, dates, hotel, weather_info)
-    
-    # Get LLM response
     response = call_llama4(prompt)
     if not response:
         return "Error: Could not generate itinerary"
-    
-    # Format result
+
+    # Extract details
     city = destination.get("city", "Unknown")
     country = destination.get("country", "")
     days = dates.get("days", "?")
-    
-    return f"""# Your {days}-Day Trip to {city}, {country}
-    
-## Trip Details
-- Dates: {dates['start']} → {dates['end']}
-- Destination: {city}, {country}
 
----
+    # ---- Trip summary ----
+    summary = f"""# Your {days}-Day Trip to {city}, {country}
+
+- 👤 Traveler: {persona.get('user_id', 'Guest')}
+- 🏨 Hotel: {hotel.get('name') if hotel else "Not selected"}
+- 📅 Dates: {dates.get('start')} → {dates.get('end')}
+- 🌤️ {weather_info}
+"""
+
+    # ---- Combine summary + LLM itinerary ----
+    return f"""{summary}
 
 {response}"""
+
+

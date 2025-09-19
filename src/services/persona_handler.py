@@ -1,7 +1,7 @@
 # persona_handler.py
 
 import streamlit as st
-from couchbase_service import get_persona_by_user_id, save_persona
+from services.couchbase_service import get_persona_by_user_id, save_persona
 
 def load_or_create_persona():
     st.subheader("✍️ Tell us about your travel style")
@@ -24,7 +24,7 @@ def load_or_create_persona():
         st.success("Loaded your saved travel preferences.")
         return st.session_state.checked_persona
 
-    # New persona form
+    # Persona form
     with st.form("persona_form"):
         travel_style = st.selectbox("What's your travel style?", ["Relaxation", "Adventure", "Cultural", "Luxury", "Backpacking", "Mixed"])
         budget = st.selectbox("Budget preference?", ["Budget", "Mid-range", "Luxury"])

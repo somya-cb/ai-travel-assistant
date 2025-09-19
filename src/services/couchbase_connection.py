@@ -6,7 +6,7 @@ from datetime import timedelta
 from couchbase.auth import PasswordAuthenticator
 from couchbase.cluster import Cluster
 from couchbase.options import ClusterOptions
-from config import load_config
+from .config import load_config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
