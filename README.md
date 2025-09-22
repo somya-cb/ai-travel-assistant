@@ -1,81 +1,135 @@
-# AI Travel Assistant - Architecture Overview
+# AI Travel Assistant
 
-## Project Overview
-A personalized travel recommendation system that uses AI to suggest destinations and create detailed itineraries based on user preferences.
+## Overview
 
-## Core Components
+The **AI Travel Assistant** is an interactive travel planning application that helps users discover personalized destinations, browse hotels, and generate complete itineraries based on their preferences. It combines AI-driven recommendations with structured user inputs for a guided, step-by-step planning experience.
 
-### 1. Frontend (Streamlit)
-- **main.py** - Single-page web application
-- User authentication (email-based)
-- Travel profile onboarding
-- Chat interface for recommendations
-- Session state management
+The app leverages:
 
-### 2. Data Storage (Couchbase)
-**Two Collections:**
-- `user_profiles` - User accounts and travel personas
-- `destinations` - Travel destinations with vector embeddings
+* **Streamlit** for the frontend interface
+* **Couchbase** for storing user profiles, destinations, hotels, and itineraries
+* **AWS Bedrock** (via `bedrock_service.py`) for AI-powered recommendations and itinerary generation
 
-**Document Types:**
-- `user_record` - Authentication and metadata
-- `travel_persona` - User preferences and travel style
-- `destination` - City data with embeddings for search
+---
 
-### 3. AI Services
-- **Amazon Bedrock** - Large language model for itinerary generation
-- **Vector Search** - Similarity matching for destination recommendations
-- **Embedding Generation** - Convert destination descriptions to vectors
+## Features
 
-### 4. Business Logic
-- **RecommendationService** - Handles destination search and matching
-- **ConversationHandler** - Manages recommendation flow state
-- **SimpleTravelPersona** - User preference data model
+* **Persona-Based Recommendations**: Build personalized travel profiles and get AI-driven suggestions
 
-### 5. Data Source
-- **CSV File** - `Worldwide Travel Cities Dataset Ratings and Climate.csv`
-- Contains destination details, ratings, and travel metadata
+* **Flexible Trip Planning**: Choose between two modes:
 
-## Data Flow
+  * **Filter-Based Search**: Uses Couchbase hybrid search to match destinations based on user-selected filters
+  * **Surprise Me**: Uses Couchbase vector search for AI-powered recommendations without specific filters
 
-### User Journey
-1. **Login** → Email/name → User record creation/retrieval
-2. **Onboarding** → Travel questionnaire → Persona creation
-3. **Chat** → Recommendation request → Vector search → AI-enhanced response
-4. **Itinerary** → Destination selection → Detailed planning via Bedrock
+* **Destination Discovery**: Recommended destinations displayed as interactive cards
 
-### Recommendation Flow
-1. User: "Recommend places for May"
-2. System: Ask clarifying questions (duration, preferences)
-3. Vector search on destination embeddings
-4. Bedrock enhances with personalized itineraries
-5. Display formatted recommendations
+* **Travel Date & Duration Handling**: Plan trips by specifying start and end dates
 
-## Technical Architecture
+* **Hotel Browsing & Selection**: Optional hotel search and detailed views integrated with destination selection
 
-### Service Dependencies
-- **Couchbase** - Document storage and vector search
-- **AWS Bedrock** - AI model inference
-- **Streamlit** - Web framework
-- **Python Libraries** - Data processing and embeddings
+* **Itinerary Generation**: AI-driven itineraries based on persona, destination, dates, and hotels
 
-### Integration Points
-- CSV data loaded into Couchbase destinations collection
-- User profiles stored as travel personas
-- Real-time vector search for recommendations
-- Bedrock API calls for itinerary generation
+* **Persistence**: Save itineraries to Couchbase for future access
 
-## Files Structure
+* **Session-Based Multi-Step Flow**: Stepwise travel planning using Streamlit’s session state
+
+---
+
+## Project Structure
+
 ```
-app/
-├── main.py                           # Main Streamlit app
-├── src/
-│   ├── models/
-│   │   └── simple_persona.py         # User preference model
-│   └── services/
-│       ├── couchbase_service.py      # Database operations
-│       ├── bedrock_service.py        # AI model integration
-│       ├── recommendation_service.py # Destination search
-│       └── conversation_handler.py   # Chat flow management
-└── data/
-    └── Worldwide Travel Cities Dataset.csv   # Destination data
+ai-travel-assistant/
+│
+├─ app/
+│  └─ main.py                   # Streamlit app entry point
+│
+├─ src/services/
+│  ├─ __init__.py
+│  ├─ bedrock_service.py        # Interfaces with AWS Bedrock for AI generation
+│  ├─ config.py                 # Load app and Couchbase configuration
+│  ├─ couchbase_connection.py   # Couchbase connection setup
+│  ├─ couchbase_service.py      # DB operations: destinations, hotels, itineraries
+│  ├─ persona_handler.py        # Load/create user personas
+│  ├─ trip_input_handler.py     # Trip mode selection and filter handling
+│  ├─ recommendation_service.py # Generates AI recommendations
+│  ├─ destination_card.py       # Display destination cards
+│  ├─ hotel_service.py          # Hotel search & formatting
+│  ├─ hotel_cards.py            # Hotel cards & detailed views
+│  ├─ itinerary_builder.py      # Itinerary generation logic
+│  ├─ process_documents.py      # Preprocess and vectorize destination and hotel documents
+│  └─ prompt_templates.py       # LLM prompt templates for recommendations
+│
+├─ config.template.json         # Template config with placeholders
+├─ requirements.txt             # Python dependencies
+└─ README.md
+```
+
+---
+
+## Installation
+
+1. **Clone the Repository**
+
+```bash
+git clone https://github.com/somya-cb/ai-travel-assistant.git
+cd ai-travel-assistant
+```
+
+2. **Create a Virtual Environment**
+
+```bash
+python3 -m venv venv
+source venv/bin/activate   # On Windows: venv\Scripts\activate
+```
+
+3. **Install Dependencies**
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Configuration
+
+1. **Copy the Template**
+
+```bash
+cp config.template.json config.json
+```
+
+2. **Edit `config.json`**
+
+Fill in your credentials and connection details:
+
+* Couchbase: host, username, password, bucket, collections
+* AWS Bedrock or other AI service keys
+
+The app reads this file at runtime to connect to the database and AI services.
+
+---
+
+## Running the App
+
+```bash
+streamlit run app/main.py
+```
+
+Open `http://localhost:8501` in your browser.
+
+---
+
+## Usage Flow
+
+1. **Persona Setup**: Define user preferences and profile
+2. **Trip Mode Selection**: Choose between two planning modes:
+
+   * **Filter-Based Search**: Matches destinations using Couchbase hybrid search based on user-selected filters
+   * **Surprise Me**: Generates recommendations using Couchbase vector search without requiring filters
+3. **Destination Selection**: AI-powered recommendations displayed as cards
+4. **Travel Dates**: Pick start and end dates for the trip
+5. **Hotel Selection (Optional)**: Browse hotels for the chosen destination
+6. **Itinerary Generation**: AI creates a complete travel itinerary
+7. **Save Itinerary**: Persist in Couchbase for later use
+8. **Plan Another Trip**: Reset session to start a new trip
+
